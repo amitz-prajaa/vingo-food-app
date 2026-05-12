@@ -25,8 +25,16 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 8000;
 
-const FRONTEND_URL =
-  process.env.FRONTEND_URL || "http://3.104.63.68";
+/* ===================================
+   ALLOWED ORIGINS
+=================================== */
+
+const allowedOrigins = [
+  "http://prajapati.cloud",
+  "http://www.prajapati.cloud",
+  "http://localhost:5173",
+  "http://vingo.prajapati.cloud"
+];
 
 /* ===================================
    SOCKET.IO
@@ -34,10 +42,10 @@ const FRONTEND_URL =
 
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST"],
-  },
+    methods: ["GET", "POST"]
+  }
 });
 
 app.set("io", io);
@@ -48,8 +56,8 @@ app.set("io", io);
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
-    credentials: true,
+    origin: allowedOrigins,
+    credentials: true
   })
 );
 
@@ -68,6 +76,14 @@ app.use("/api/shop", shopRouter);
 app.use("/api/order", orderRouter);
 
 /* ===================================
+   HEALTH CHECK
+=================================== */
+
+app.get("/", (req, res) => {
+  res.send("Backend API Running...");
+});
+
+/* ===================================
    SOCKET HANDLER
 =================================== */
 
@@ -80,9 +96,9 @@ socketHandler(io);
 server.listen(PORT, async () => {
   try {
     await connectDb();
-    console.log("DB connected");
-    console.log(`Server started on port ${PORT}`);
+    console.log("Database Connected");
+    console.log(`Server Running On Port ${PORT}`);
   } catch (error) {
-    console.log("DB connection failed:", error.message);
+    console.log("Database Connection Failed:", error.message);
   }
 });
